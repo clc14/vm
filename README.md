@@ -4,8 +4,8 @@ Blank VMware Workstation/Player files to create CentOS 7 VMs for RHCSA/RHCE prac
 Instructions for use:
 
 * Download and install VMware Workstation or Player
-* Download ELLIS.zip
-* Extract ELLIS.zip
+* Download vms.zip
+* Extract vms.zip
 * Go into the ELLIS folder
 * Double-click on the .vmx file
 * Edit the virtual machine settings, and for the first CD/DVD device, select use Image ISO file
