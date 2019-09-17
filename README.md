@@ -14,13 +14,6 @@ Instructions for use:
 * (OPTIONAL) When the machine boots and the Install CentOS 7 menu comes up, press tab
    * After "quiet" at the end of the line, go to Edit->Paste and copy/paste ks=https://raw.githubusercontent.com/clc14/vm/master/ellis.cfg.txt then press enter to install CentOS automatically or install manually.
 
-* Once CentOS boots, login to the machine. The username and password are both vagrant. The root password is admin.
-* Right-click on the desktop, click Open Terminal, and type sudo -i to get into root shell
-*  Copy/paste the following commands:
-    * git clone https://github.com/sdoconnell/ellis.git 
-    * cd ellis
-    * chmod +x ellis.sh
-* Run ./ellis.sh
     * The DVD is mounted on /var/www/html/repo. If you want to copy the DVD locally instead, then unmount it with umount /var/www/html/repo; remove the line from /etc/fstab. Refer to https://github.com/sdoconnell/ELLIS#setup-and-installation to copy the files from the DVD to /var/www/html/repo. You can create different VM versions like Red Hat 7.0 by choosing the ISO in VMware and mounting the ISO to /var/www/html/repo in Linux.
 
 * Type cd to go back to /root. 
