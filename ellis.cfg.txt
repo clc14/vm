@@ -1,10 +1,16 @@
 #version=RHEL7
 # System authorization information
 auth --enableshadow --passalgo=sha512
-reboot
-text
-# Use CDROM installation media
+repo --name=updates --baseurl=http://mirror.centos.org/centos/7/updates/x86_64/
+repo --name=base --baseurl=http://mirror.centos.org/centos/7/os/x86_64/ 
+
 cdrom
+#url --url http://mirror.centos.org/centos/7/os/x86_64/ 
+text
+
+reboot
+# Use CDROM installation media
+
 # Run the Setup Agent on first boot
 firstboot --disable
 ignoredisk --only-use=sda
@@ -15,90 +21,249 @@ lang en_US.UTF-8
 eula --agreed
 
 # Network information
-network  --bootproto=dhcp --device=ens33 --ipv6=auto --activate
-network  --hostname=localhost.localdomain
-# Root password
-rootpw admin
+network  --bootproto=dhcp --device=link --ipv6=auto --activate
+network  --hostname=ellis
+sshkey --username=vagrant "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant"
+sshkey --username=root "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant"
 # System services
-services --enabled="chronyd"
+services --enabled="chronyd,sshd"
 # System timezone
-timezone America/Chicago --isUtc
-user --groups=wheel --homedir=/home/vagrant --name=vagrant --password=vagrant --gecos="vagrant"
+timezone America/Chicago --isUtc --ntpservers=0.pool.ntp.org,1.pool.ntp.org
+user --groups=wheel --name=vagrant --password=vagrant --plaintext --gecos="vagrant"
+rootpw --plaintext vagrant
+
 # X Window System configuration information
 xconfig  --startxonboot
 # System bootloader configuration
-bootloader --location=mbr --boot-drive=sda
+bootloader --location=mbr --boot-drive=sda --append="console=tty0 console=ttyS0"
 # Partition clearing information
 zerombr
 clearpart --all --initlabel
+	
 partition /boot --fstype=xfs --size=500
 partition pv.01 --size=100 --grow
 volgroup sysvg pv.01
 logvol / --fstype=xfs --vgname=sysvg --name=rootLV --size=2000 --grow
-logvol swap --fstype=swap --vgname=sysvg --name=swapLV --size=1000
+logvol swap --fstype=swap --vgname=sysvg --name=swapLV --size=2000
 
-%packages --ignoremissing
-@base
+%packages --ignoremissing --nobase
+# @^ is environment group
+# is package group
 @core
-#@desktop-debugging
-#@dial-up
-@file-server
-@fonts
-@gnome-desktop
--office-suite
-openldap-clients
-openldap-servers
-migrationtools
-@guest-agents
-@guest-desktop-agents
-@input-methods
-@internet-browser
-#@multimedia
-@network-file-system-client
-#@print-client
-@virtualization-client
-@virtualization-hypervisor
-@virtualization-tools
-@x11
-chrony
-krb5-server
-krb5-workstation
-pam_krb5
-httpd
-lynx
-virt-who
+#@^Server with GUI
+-iwl*
+-aic94xx-firmware
+-alsa-firmware
+-alsa-lib
+-alsa-tools-firmware
+-iprutils
+-ivtv-firmware
+-iwl100-firmware
+-iwl1000-firmware
+-iwl105-firmware
+-iwl135-firmware
+-iwl2000-firmware
+-iwl2030-firmware
+-iwl3160-firmware
+-iwl3945-firmware
+-iwl4965-firmware
+-iwl5000-firmware
+-iwl5150-firmware
+-iwl6000-firmware
+-iwl6000g2a-firmware
+-iwl6000g2b-firmware
+-iwl6050-firmware
+-iwl7260-firmware
+-iwl7265-firmware
+-libertas-sd8686-firmware
+-libertas-sd8787-firmware
+-libertas-usb8388-firmware
+vim
+zip
+bzip2
 wget
+net-tools
+xz
 git
+epel-release
+nfs-utils 
+policycoreutils-python
+postfix
+samba 
+samba-client 
+cifs-utils
+httpd 
+lynx
+createrepo
+krb5-server 
+krb5-workstation 
+pam_krb5 
+chrony
+openldap 
+openldap-clients 
+openldap-servers 
+migrationtools
+gnome-boxes
+virt-manager
+virt-top
+virt-viewer
+qemu-kvm
+libvirt
+libvirt-client
+virt-who
+virt-install
+libguestfs
+pam_ldap
 %end
 
 %post
-#for i in /etc/yum.repos.d/*.repo
-#do 
-#  if [ $i == "CentOS-Media.repo" ]
-#    then continue
-#      else mv $i ${i}.distrib
-#  fi
-#done
-if [ -e  /etc/yum.repos.d/CentOS-Media.repo ]; then 
-cat >> /etc/yum.repos.d/CentOS-Media.repo << 'EOF'
-skip_if_unavailable=true
-cost=500
-EOF
-fi
-sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/CentOS-Media.repo
-echo '%wheel     ALL=(ALL)     NOPASSWD:     ALL' >> /etc/sudoers.d/wheel
-mkdir /var/www/html/repo
-cat >> /etc/fstab << 'EOF'
-/dev/sr0 /media/cdrom iso9660 defaults,ro,nofail 0 0
-/dev/sr0 /var/www/html/repo iso9660 defaults,ro,nofail 0 0
-EOF
-sed -i 's/^#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
-mkdir -m 0700 -p /home/vagrant/.ssh /root/.ssh
-KEY="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key"
-echo ${KEY} >> /home/vagrant/.ssh/authorized_keys
-echo ${KEY} >> /root/.ssh/authorized_keys
-chmod 0600 /home/vagrant/.ssh/authorized_keys /root/.ssh/authorized_keys
-chown -R root:root /root/.ssh
-chown -R vagrant:vagrant /home/vagrant/.ssh
-%end
+# Sometimes Anaconda ignores selinux --disabled
+#sed -i -e 's/\(^SELINUX=\)enforcing$/\1disabled/' /etc/selinux/config
 
+# don't run gnome-initial-setup
+mkdir ~vagrant/.config
+touch ~vagrant/.config/gnome-initial-setup-done
+chown -R vagrant:vagrant ~vagrant/.config
+
+mkdir /root/.config
+touch /root/.config/gnome-initial-setup-done
+chown -R root:root ~root/.config
+
+# disable gnome-software automatically downloading updates
+cat >> /usr/share/glib-2.0/schemas/org.gnome.software.gschema.override << FOE
+[org.gnome.software]
+download-updates=false
+FOE
+
+#make sure our config directory has the correct permissions so gnome loads
+chown vagrant:vagrant -R ~vagrant/.config
+chown root:root -R ~root/.config
+	
+# rebuild schema cache with any overrides we installed
+glib-compile-schemas /usr/share/glib-2.0/schemas
+
+
+# vimrc
+echo 'set background=dark' >> ~vagrant/.vimrc
+chown vagrant:vagrant ~vagrant/.vimrc
+echo 'set background=dark' >> ~root/.vimrc
+chown root:root ~root/.vimrc
+
+cat >/etc/profile.d/custom.sh <<'EOF'
+
+# exit if not an interactive shell
+[ ! -t 0 ] && return
+
+if [ -n "$BASH_VERSION" -o -n "$KSH_VERSION" -o -n "$ZSH_VERSION" ]; then
+  [ -e /usr/bin/vim ] && alias vi=vim || alias vim=vi
+fi
+
+# disable bell
+setterm -blength 0
+
+#begin bash specific stuff
+if [ ! -n "$BASH_VERSION" ]; then
+  return
+fi
+
+# start copy from /etc/bashrc 
+# are we an interactive shell?
+if [ "$PS1" ]; then
+  if [ -z "$PROMPT_COMMAND" ]; then
+    case $TERM in
+    xterm*|vte*)
+      if [ -e /etc/sysconfig/bash-prompt-xterm ]; then
+          PROMPT_COMMAND=/etc/sysconfig/bash-prompt-xterm
+      elif [ "${VTE_VERSION:-0}" -ge 3405 ]; then
+          PROMPT_COMMAND="__vte_prompt_command"
+      else
+          PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+      fi
+      ;;
+    screen*)
+      if [ -e /etc/sysconfig/bash-prompt-screen ]; then
+          PROMPT_COMMAND=/etc/sysconfig/bash-prompt-screen
+      else
+          PROMPT_COMMAND='printf "\033k%s@%s:%s\033\\" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+      fi
+      ;;
+    *)
+      [ -e /etc/sysconfig/bash-prompt-default ] && PROMPT_COMMAND=/etc/sysconfig/bash-prompt-default
+      ;;
+    esac
+  fi
+  # Turn on parallel history
+  shopt -s histappend
+  history -a
+  # Turn on checkwinsize
+  shopt -s checkwinsize
+  # [ "$PS1" = "\\s-\\v\\\$ " ] && PS1="[\u@\h \W]\\$ "
+  # You might want to have e.g. tty in prompt (e.g. more virtual machines)
+  # and console windows
+  # If you want to do so, just add e.g.
+  # if [ "$PS1" ]; then
+  #   PS1="[\u@\h:\l \W]\\$ "
+  # fi
+  # to your custom modification shell script in /etc/profile.d/ directory
+fi
+
+#begin custom stuff
+HISTTIMEFORMAT="%F %r: "
+HISTSIZE="100000"
+HISTFILESIZE="100000"
+[ "$PS1" = "\\s-\\v\\\$ " ] && PS1="\u@\[\e[1;36m\]\h\[\e[m\]:\[\e[1;34m\]\w\[\e[m\]\\$ "
+PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+
+EOF
+
+#overwrite vim alias in vim.sh
+echo > /etc/profile.d/vim.sh
+
+#sudoers section
+sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+#environment section 
+cat >/etc/environment<<'EOF'
+LANG=en_US.utf-8
+LC_ALL=en_US.utf-8
+EOF
+
+
+# Show IPs on the console screen
+cat > /sbin/ifup-local << 'EOF'
+#!/bin/sh
+if [ "$1" = lo ]; then
+    exit 0
+fi
+if [ ! -e /etc/issue.old ]; then cp /etc/issue /etc/issue.old; fi
+cat /etc/issue.old > /etc/issue
+echo "NOTE: root password is 'vagrant' and the user login/password is 'vagrant'" >> /etc/issue
+echo "This file is /sbin/ifup-local" >> /etc/issue
+ips="$(ip a|grep 'inet '| grep -Ev '127.0.0.1|192.168.122.1'|awk '{print $2}'|cut -d/ -f1)"
+echo `hostname -s` IPs: $ips >> /etc/issue
+echo "" >> /etc/issue
+EOF
+chmod 755 /sbin/ifup-local
+# Add script for NetworkManager
+cat > /etc/NetworkManager/dispatcher.d/00-issue <<'EOF'
+#!/bin/sh
+/sbin/ifup-local $1 $2
+EOF
+chmod 755 /etc/NetworkManager/dispatcher.d/00-issue
+
+sed -i 's/^#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
+
+echo "@reboot root sh -c 'rm -fr /root/ELLIS; cd /root && git clone https://github.com/clc14/ELLIS.git && cd ELLIS && ./ellis.sh && userdel ldapuser01 ; userdel ldapuser02 ; authconfig --enableforcelegacy --enableldap --enableldapauth \
+--ldapserver=\"lab.example.com\" \
+--ldapbasedn=\"dc=example,dc=com\" --enableldaptls --ldaploadcacert http://lab.example.com/ldap/cert.pem --updateall'" >> /etc/crontab
+echo "@reboot root sed -i '/reboot/d' /etc/crontab" >> /etc/crontab
+echo "" >| /etc/motd
+echo "This lab's documentation at http://localhost (try lynx http://localhost) or http://thismachinesip" >> /etc/motd
+echo "Be sure to make sure you insert the install DVD and it's mounted to /var/www/html/repo" >> /etc/motd
+echo 'run mount -a to be sure' >> /etc/motd
+echo 'virtualize intel/amd vtx must be enabled in vmware settings for good performance on qemu-kvm.' >> /etc/motd
+echo "" >> /etc/motd
+echo "# mount the install cdrom to /var/www/html/repo"
+echo "/dev/cdrom /var/www/html/repo iso9660 ro,defaults,nofail 0 0" >> /etc/fstab
+
+
+%end
