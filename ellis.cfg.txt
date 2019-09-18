@@ -78,6 +78,7 @@ logvol swap --fstype=swap --vgname=sysvg --name=swapLV --size=2000
 -libertas-sd8686-firmware
 -libertas-sd8787-firmware
 -libertas-usb8388-firmware
+-libreoffice*
 vim
 zip
 bzip2
