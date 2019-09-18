@@ -50,7 +50,7 @@ logvol swap --fstype=swap --vgname=sysvg --name=swapLV --size=2000
 # @^ is environment group
 # is package group
 @core
-#@^Server with GUI
+@^Server with GUI
 -iwl*
 -aic94xx-firmware
 -alsa-firmware
